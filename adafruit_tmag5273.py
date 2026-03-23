@@ -267,8 +267,7 @@ class TMAG5273:
         time.sleep(0.001)
         if self.manufacturer_id != _MANUFACTURER_ID:
             raise RuntimeError(
-                f"Failed to find TMAG5273 - check wiring! "
-                f"Got manufacturer ID 0x{self.manufacturer_id:04X}"
+                f"Failed to find TMAG5273, found: 0x{self.manufacturer_id:04X}"
             )
 
         ver = self.device_id & 0x03
