@@ -27,16 +27,18 @@ Implementation Notes
 * Adafruit's Register library: https://github.com/adafruit/Adafruit_CircuitPython_Register
 """
 
-import time
 import struct
-from micropython import const
+import time
+
 from adafruit_bus_device.i2c_device import I2CDevice
-from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 from adafruit_register.i2c_bits import RWBits
+from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
+from micropython import const
 
 try:
     from typing import Tuple
+
     from busio import I2C
 except ImportError:
     pass
@@ -264,10 +266,7 @@ class TMAG5273:
 
         time.sleep(0.001)
         if self.manufacturer_id != _MANUFACTURER_ID:
-            raise RuntimeError(
-                f"Failed to find TMAG5273 - check wiring! "
-                f"Got manufacturer ID 0x{self.manufacturer_id:04X}"
-            )
+            raise RuntimeError(f"Failed to find TMAG5273, found: 0x{self.manufacturer_id:04X}")
 
         ver = self.device_id & 0x03
         self._is_x2 = ver == 0x02
@@ -335,7 +334,8 @@ class TMAG5273:
             i2c.write_then_readinto(bytes([register]), buf)
         return struct.unpack(">h", buf)[0]
 
-    def _raw_to_microtesla(self, raw: int, range_mt: float) -> float:
+    @staticmethod
+    def _raw_to_microtesla(raw: int, range_mt: float) -> float:
         return (raw / 32768.0) * range_mt * 1000.0
 
     @property
@@ -381,7 +381,7 @@ class TMAG5273:
         """
         raw = self._magnitude_raw
         angle_mode = self.angle_calculation
-        if angle_mode in (ANGLE_XZ, ANGLE_YZ):
+        if angle_mode in {ANGLE_XZ, ANGLE_YZ}:
             range_val = max(self._range_xy, self._range_z)
         else:
             range_val = self._range_xy
